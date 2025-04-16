@@ -3,49 +3,78 @@ import {
   initializeLocalStorage,
   getRandomPhrase,
   addRandomPhrase,
+  getAllPhrases,
 } from "./components/localStorageUtils";
 
-import { useFavorites } from "./components/FavoritesContext";
-
-
-// Начальное состояние фильтра
 const initialFilterState = {
-  search: "",
+  allPhrases: [],
+  filteredPhrases: [],
+  author: "Все",
 };
 
-// Редьюсер фильтра
-const filterReducer = (state, action) => {
+const reducer = (state, action) => {
   switch (action.type) {
-    case "SET_SEARCH":
-      return { ...state, search: action.payload };
-    case "RESET":
-      return initialFilterState;
+    case "SET_PHRASES":
+      return {
+        ...state,
+        allPhrases: action.payload,
+        filteredPhrases: action.payload,
+      };
+    case "FILTER_BY_AUTHOR":
+      return {
+        ...state,
+        author: action.payload,
+        filteredPhrases:
+          action.payload === "Все"
+            ? state.allPhrases
+            : state.allPhrases.filter(
+                (phrase) =>
+                  phrase.author &&
+                  phrase.author.toLowerCase() === action.payload.toLowerCase()
+              ),
+      };
     default:
       return state;
   }
 };
 
-
 const App = () => {
-  const [randomPhrase, setRandomPhrase] = useState("");
+  const [randomPhrase, setRandomPhrase] = useState({ text: "", author: "" });
   const [newPhrase, setNewPhrase] = useState("");
-  const { favoritePhrases, setFavoritePhrases } = useFavorites();
-  const [filterState, dispatch] = useReducer(filterReducer, initialFilterState);
+  const [newAuthor, setNewAuthor] = useState("");
+  const [favoritePhrases, setFavoritePhrases] = useState([]);
+
+  const [state, dispatch] = useReducer(reducer, initialFilterState);
+
+  useEffect(() => {
+    initializeLocalStorage();
+    const storedFavorites = JSON.parse(localStorage.getItem("favoritePhrases")) || [];
+    setFavoritePhrases(storedFavorites);
+    const random = getRandomPhrase();
+    setRandomPhrase(random);
+    const phrases = getAllPhrases();
+    dispatch({ type: "SET_PHRASES", payload: phrases });
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("favoritePhrases", JSON.stringify(favoritePhrases));
   }, [favoritePhrases]);
 
   const handleAddPhrase = () => {
-    if (newPhrase.trim() !== "") {
-      addRandomPhrase(newPhrase);
+    if (newPhrase.trim() !== "" && newAuthor.trim() !== "") {
+      addRandomPhrase(newPhrase, newAuthor);
       setRandomPhrase(getRandomPhrase());
       setNewPhrase("");
+      setNewAuthor("");
+      dispatch({ type: "SET_PHRASES", payload: getAllPhrases() });
     }
   };
 
   const handleSetFavorite = () => {
-    if (!favoritePhrases.includes(randomPhrase)) {
+    const isDuplicate = favoritePhrases.some(
+      (p) => p.text === randomPhrase.text && p.author === randomPhrase.author
+    );
+    if (!isDuplicate) {
       setFavoritePhrases([...favoritePhrases, randomPhrase]);
     }
   };
@@ -53,25 +82,25 @@ const App = () => {
   const handleGenerateNew = () => {
     setRandomPhrase(getRandomPhrase());
   };
-  const filteredFavorites = favoritePhrases.filter((phrase) =>
-    phrase.toLowerCase().includes(filterState.search.toLowerCase())
-  );
+
+  const authors = ["Все", ...new Set(state.allPhrases.map((p) => p.author).filter(Boolean))];
 
   return (
     <div className="App">
       <h1>Random Phrase</h1>
 
-      {/* Случайная фраза */}
       <div>
         <h2>Случайная фраза:</h2>
-        <p>{randomPhrase}</p>
+        <p>
+          {randomPhrase.text ? `"${randomPhrase.text}" — ` : ""}
+          <strong>{randomPhrase.author}</strong>
+        </p>
         <button onClick={handleSetFavorite}>Добавить в избранное</button>
         <button onClick={handleGenerateNew} style={{ marginLeft: "10px" }}>
           Сгенерировать
         </button>
       </div>
 
-      {/* Добавление новой фразы */}
       <div style={{ marginTop: "20px" }}>
         <input
           type="text"
@@ -79,39 +108,56 @@ const App = () => {
           onChange={(e) => setNewPhrase(e.target.value)}
           placeholder="Введите новую фразу"
         />
-        <button onClick={handleAddPhrase}>Добавить фразу</button>
+        <input
+          type="text"
+          value={newAuthor}
+          onChange={(e) => setNewAuthor(e.target.value)}
+          placeholder="Автор фразы"
+          style={{ marginLeft: "10px" }}
+        />
+        <button onClick={handleAddPhrase} style={{ marginLeft: "10px" }}>
+          Добавить фразу
+        </button>
       </div>
 
-      
-      {/* Фильтр по ключевому слову */}
-      {favoritePhrases.length > 0 && (
-        <div style={{ marginTop: "30px" }}>
-          <h2>Фильтр:</h2>
-          <input
-            type="text"
-            value={filterState.search}
-            onChange={(e) =>
-              dispatch({ type: "SET_SEARCH", payload: e.target.value })
-            }
-            placeholder="Фильтр по ключевому слову"
-          />
-          <button
-            onClick={() => dispatch({ type: "RESET" })}
-            style={{ marginLeft: "10px" }}
-          >
-            Сбросить фильтр
-          </button>
-        </div>
-      )}
+      <div style={{ marginTop: "30px" }}>
+        <h2>Фильтрация по автору:</h2>
+        <select
+          value={state.author}
+          onChange={(e) =>
+            dispatch({ type: "FILTER_BY_AUTHOR", payload: e.target.value })
+          }
+        >
+          {authors.map((author, idx) => (
+            <option key={idx} value={author}>
+              {author}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* Список избранных (фильтрованных) */}
-      {filteredFavorites.length > 0 && (
+      <div style={{ marginTop: "30px" }}>
+        <h2>Фразы по автору:</h2>
+        {state.filteredPhrases.length > 0 ? (
+          <ul>
+            {state.filteredPhrases.map((phrase, index) => (
+              <li key={index}>
+                "{phrase.text}" — <strong>{phrase.author}</strong>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Нет фраз для выбранного автора.</p>
+        )}
+      </div>
+
+      {favoritePhrases.length > 0 && (
         <div style={{ marginTop: "30px" }}>
           <h2>Избранные фразы:</h2>
           <ul>
-            {filteredFavorites.map((phrase, index) => (
+            {favoritePhrases.map((phrase, index) => (
               <li key={index} style={{ color: "green", fontStyle: "italic" }}>
-                {phrase}
+                "{phrase.text}" — <strong>{phrase.author}</strong>
               </li>
             ))}
           </ul>
