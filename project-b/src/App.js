@@ -1,25 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { initializeLocalStorage, getRandomPhrase, addRandomPhrase } from "./components/localStorageUtils";
 
-function App() {
+const App = () => {
+  const [randomPhrase, setRandomPhrase] = useState(""); // рандом фразы
+  const [newPhrase, setNewPhrase] = useState(""); // ввод новой фразы
+
+  // Инициализация при первом рендере
+  useEffect(() => {
+    initializeLocalStorage(); 
+    setRandomPhrase(getRandomPhrase()); // случайная фраза при загрузке компонента
+  }, []);
+
+  // Обработчик новой фразы
+  const handleAddPhrase = () => {
+    if (newPhrase.trim() !== "") {
+      addRandomPhrase(newPhrase); // Добавление фразы в localStorage
+      setRandomPhrase(getRandomPhrase()); // Новая случайную фразу
+      setNewPhrase(""); // Очистка поля ввода
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Random Phrase</h1>
+
+       {/* Отображение случайной фразы  */}
+      <div>
+        <h2>Случайная фраза:</h2>
+        <p>{randomPhrase}</p>
+      </div>
+
+      {/* Форма для добавления новой фразы */}
+      <div>
+        <input
+          type="text"
+          value={newPhrase}
+          onChange={(e) => setNewPhrase(e.target.value)}
+          placeholder="Введите новую фразу"
+        />
+        <button onClick={handleAddPhrase}>Добавить фразу</button>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
