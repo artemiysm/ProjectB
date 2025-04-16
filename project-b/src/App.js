@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useRef } from "react";
 import {
   initializeLocalStorage,
   getRandomPhrase,
@@ -59,7 +59,14 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("favoritePhrases", JSON.stringify(favoritePhrases));
   }, [favoritePhrases]);
+  
+  const generateBtnRef = useRef(null); // ← создаём ref
 
+  useEffect(() => {
+    if (generateBtnRef.current) {
+      generateBtnRef.current.focus(); // ← фокус на кнопке
+    }
+  }, []);
   const handleAddPhrase = () => {
     if (newPhrase.trim() !== "" && newAuthor.trim() !== "") {
       addRandomPhrase(newPhrase, newAuthor);
@@ -96,7 +103,12 @@ const App = () => {
           <strong>{randomPhrase.author}</strong>
         </p>
         <button onClick={handleSetFavorite}>Добавить в избранное</button>
-        <button onClick={handleGenerateNew} style={{ marginLeft: "10px" }}>
+
+        <button
+          ref={generateBtnRef}
+          onClick={handleGenerateNew}
+          style={{ marginLeft: "10px" }}
+        >
           Сгенерировать
         </button>
       </div>
