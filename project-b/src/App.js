@@ -1,25 +1,80 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import {
+  initializeLocalStorage,
+  getRandomPhrase,
+  addRandomPhrase,
+} from "./components/localStorageUtils";
 
-function App() {
+import { useFavorites } from "./components/FavoritesContext";
+
+const App = () => {
+  const [randomPhrase, setRandomPhrase] = useState("");
+  const [newPhrase, setNewPhrase] = useState("");
+  const { favoritePhrases, setFavoritePhrases } = useFavorites();
+  
+
+  useEffect(() => {
+    localStorage.setItem("favoritePhrases", JSON.stringify(favoritePhrases));
+  }, [favoritePhrases]);
+
+  const handleAddPhrase = () => {
+    if (newPhrase.trim() !== "") {
+      addRandomPhrase(newPhrase);
+      setRandomPhrase(getRandomPhrase());
+      setNewPhrase("");
+    }
+  };
+
+  const handleSetFavorite = () => {
+    if (!favoritePhrases.includes(randomPhrase)) {
+      setFavoritePhrases([...favoritePhrases, randomPhrase]);
+    }
+  };
+
+  const handleGenerateNew = () => {
+    setRandomPhrase(getRandomPhrase());
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Random Phrase</h1>
+
+      {/* Случайная фраза */}
+      <div>
+        <h2>Случайная фраза:</h2>
+        <p>{randomPhrase}</p>
+        <button onClick={handleSetFavorite}>Добавить в избранное</button>
+        <button onClick={handleGenerateNew} style={{ marginLeft: "10px" }}>
+          Сгенерировать
+        </button>
+      </div>
+
+      {/* Добавление новой фразы */}
+      <div style={{ marginTop: "20px" }}>
+        <input
+          type="text"
+          value={newPhrase}
+          onChange={(e) => setNewPhrase(e.target.value)}
+          placeholder="Введите новую фразу"
+        />
+        <button onClick={handleAddPhrase}>Добавить фразу</button>
+      </div>
+
+      {/* Список избранных */}
+      {favoritePhrases.length > 0 && (
+        <div style={{ marginTop: "30px" }}>
+          <h2>Избранные фразы:</h2>
+          <ul>
+            {favoritePhrases.map((phrase, index) => (
+              <li key={index} style={{ color: "green", fontStyle: "italic" }}>
+                {phrase}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default App;
