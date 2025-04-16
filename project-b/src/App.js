@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import {
   initializeLocalStorage,
   getRandomPhrase,
@@ -7,11 +7,30 @@ import {
 
 import { useFavorites } from "./components/FavoritesContext";
 
+
+// Начальное состояние фильтра
+const initialFilterState = {
+  search: "",
+};
+
+// Редьюсер фильтра
+const filterReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_SEARCH":
+      return { ...state, search: action.payload };
+    case "RESET":
+      return initialFilterState;
+    default:
+      return state;
+  }
+};
+
+
 const App = () => {
   const [randomPhrase, setRandomPhrase] = useState("");
   const [newPhrase, setNewPhrase] = useState("");
   const { favoritePhrases, setFavoritePhrases } = useFavorites();
-  
+  const [filterState, dispatch] = useReducer(filterReducer, initialFilterState);
 
   useEffect(() => {
     localStorage.setItem("favoritePhrases", JSON.stringify(favoritePhrases));
@@ -34,6 +53,9 @@ const App = () => {
   const handleGenerateNew = () => {
     setRandomPhrase(getRandomPhrase());
   };
+  const filteredFavorites = favoritePhrases.filter((phrase) =>
+    phrase.toLowerCase().includes(filterState.search.toLowerCase())
+  );
 
   return (
     <div className="App">
@@ -60,12 +82,34 @@ const App = () => {
         <button onClick={handleAddPhrase}>Добавить фразу</button>
       </div>
 
-      {/* Список избранных */}
+      
+      {/* Фильтр по ключевому слову */}
       {favoritePhrases.length > 0 && (
+        <div style={{ marginTop: "30px" }}>
+          <h2>Фильтр:</h2>
+          <input
+            type="text"
+            value={filterState.search}
+            onChange={(e) =>
+              dispatch({ type: "SET_SEARCH", payload: e.target.value })
+            }
+            placeholder="Фильтр по ключевому слову"
+          />
+          <button
+            onClick={() => dispatch({ type: "RESET" })}
+            style={{ marginLeft: "10px" }}
+          >
+            Сбросить фильтр
+          </button>
+        </div>
+      )}
+
+      {/* Список избранных (фильтрованных) */}
+      {filteredFavorites.length > 0 && (
         <div style={{ marginTop: "30px" }}>
           <h2>Избранные фразы:</h2>
           <ul>
-            {favoritePhrases.map((phrase, index) => (
+            {filteredFavorites.map((phrase, index) => (
               <li key={index} style={{ color: "green", fontStyle: "italic" }}>
                 {phrase}
               </li>
