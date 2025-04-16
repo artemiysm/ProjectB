@@ -94,106 +94,93 @@ const App = () => {
   const authors = ["Все", ...new Set(state.allPhrases.map((p) => p.author).filter(Boolean))];
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-purple-100 to-blue-100 text-gray-800 font-sans">
-      <h1 className="text-3xl font-bold mb-6 text-center">Random Phrase</h1>
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-sans">
+      <div className="container mx-auto px-6 py-12">
+        <h1 className="text-4xl font-semibold text-center mb-8">Random Phrase Generator</h1>
 
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <h2 className="text-xl font-semibold mb-2">Случайная фраза:</h2>
-        <p className="text-lg italic">
-        {randomPhrase.text ? '"${randomPhrase.text}" - ': ""}
-          <strong>{randomPhrase.author}</strong>
-        </p>
-        <div className="mt-4 space-x-2">
-          <button
-            onClick={handleSetFavorite}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            Добавить в избранное
-          </button>
-
-          <button
-            ref={generateBtnRef}
-            onClick={handleGenerateNew}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Сгенерировать
-          </button>
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Случайная фраза:</h2>
+          <div className="text-center mb-6">
+            <p className="text-lg italic text-gray-600">
+              {randomPhrase.text ? `"${randomPhrase.text}" - ` : ""}
+              <strong className="text-gray-800">{randomPhrase.author}</strong>
+            </p>
+          </div>
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={handleSetFavorite}
+              className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              Добавить в избранное
+            </button>
+            <button
+              ref={generateBtnRef}
+              onClick={handleGenerateNew}
+              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              Сгенерировать
+            </button>
+          </div>
         </div>
-      </div>
 
-Степанолас, [17.04.2025 0:28]
-<div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <h2 className="text-xl font-semibold mb-2">Добавить свою фразу:</h2>
-        <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
-          <input
-            type="text"
-            value={newPhrase}
-            onChange={(e) => setNewPhrase(e.target.value)}
-            placeholder="Введите новую фразу"
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="text"
-            value={newAuthor}
-            onChange={(e) => setNewAuthor(e.target.value)}
-            placeholder="Автор фразы"
-            className="border p-2 rounded w-full"
-          />
-          <button
-            onClick={handleAddPhrase}
-            className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-          >
-            Добавить фразу
-          </button>
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Добавить свою фразу:</h2>
+          <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-4 sm:space-y-0">
+            <input
+              type="text"
+              value={newPhrase}
+              onChange={(e) => setNewPhrase(e.target.value)}
+              placeholder="Введите новую фразу"
+              className="border-2 p-4 rounded-lg w-full text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              value={newAuthor}
+              onChange={(e) => setNewAuthor(e.target.value)}
+              placeholder="Автор фразы"
+              className="border-2 p-4 rounded-lg w-full text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              onClick={handleAddPhrase}
+              className="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              Добавить фразу
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <h2 className="text-xl font-semibold mb-2">Фильтрация по автору:</h2>
-        <select
-          value={state.author}
-          onChange={(e) =>
-            dispatch({ type: "FILTER_BY_AUTHOR", payload: e.target.value })
-          }
-          className="border p-2 rounded w-full"
-        >
-          {authors.map((author, idx) => (
-            <option key={idx} value={author}>
-              {author}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <FilteredPhraseList phrases={state.allPhrases} author={state.author} />
-
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <h2 className="text-xl font-semibold mb-2">Фразы по автору:</h2>
-        {state.filteredPhrases.length > 0 ? (
-          <ul className="list-disc list-inside">
-            {state.filteredPhrases.map((phrase, index) => (
-              <li key={index}>
-                "{phrase.text}" — <strong>{phrase.author}</strong>
-              </li>
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Фильтрация по автору:</h2>
+          <select
+            value={state.author}
+            onChange={(e) =>
+              dispatch({ type: "FILTER_BY_AUTHOR", payload: e.target.value })
+            }
+            className="border-2 p-4 rounded-lg w-full text-gray-800 focus:ring-2 focus:ring-blue-400"
+          >
+            {authors.map((author, idx) => (
+              <option key={idx} value={author}>
+                {author}
+              </option>
             ))}
-          </ul>
-        ) : (
-          <p>Нет фраз для выбранного автора.</p>
+          </select>
+        </div>
+
+        <FilteredPhraseList phrases={state.allPhrases} author={state.author} />
+
+        {favoritePhrases.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Избранные фразы:</h2>
+            <ul className="list-disc list-inside text-green-600">
+              {favoritePhrases.map((phrase, index) => (
+                <li key={index} className="italic">
+                  "{phrase.text}" — <strong>{phrase.author}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
-
-      {favoritePhrases.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl font-semibold mb-2">Избранные фразы:</h2>
-          <ul className="list-disc list-inside">
-            {favoritePhrases.map((phrase, index) => (
-              <li key={index} className="text-green-700 italic">
-                "{phrase.text}" — <strong>{phrase.author}</strong>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 };
