@@ -5,19 +5,13 @@ import {
   addRandomPhrase,
 } from "./components/localStorageUtils";
 
+import { useFavorites } from "./components/FavoritesContext";
+
 const App = () => {
   const [randomPhrase, setRandomPhrase] = useState("");
   const [newPhrase, setNewPhrase] = useState("");
-  const [favoritePhrases, setFavoritePhrases] = useState([]);
-
-  useEffect(() => {
-    initializeLocalStorage();
-
-    const storedFavorites = JSON.parse(localStorage.getItem("favoritePhrases")) || [];
-    setFavoritePhrases(storedFavorites);
-
-    setRandomPhrase(getRandomPhrase());
-  }, []);
+  const { favoritePhrases, setFavoritePhrases } = useFavorites();
+  
 
   useEffect(() => {
     localStorage.setItem("favoritePhrases", JSON.stringify(favoritePhrases));
