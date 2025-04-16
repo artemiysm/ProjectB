@@ -1,3 +1,4 @@
+import React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
 //useContext – для глобального состояния избранных цитат.
 const FavoritesContext = createContext();
