@@ -5,7 +5,7 @@ import {
   addRandomPhrase,
   getAllPhrases,
 } from "./components/localStorageUtils";
-
+import FilteredPhraseList from "./components/FilterPfraseList";
 const initialFilterState = {
   allPhrases: [],
   filteredPhrases: [],
@@ -135,7 +135,7 @@ const App = () => {
           ))}
         </select>
       </div>
-
+      <FilteredPhraseList phrases={state.allPhrases} author={state.author} />
       <div style={{ marginTop: "30px" }}>
         <h2>Фразы по автору:</h2>
         {state.filteredPhrases.length > 0 ? (
