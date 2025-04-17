@@ -114,7 +114,7 @@ const App = () => {
   const authors = ["Все", ...new Set(state.allPhrases.map((p) => p.author).filter(Boolean))];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-sans">
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600 text-black font-sans">
       <div className="container mx-auto px-6 py-12">
         <h1 className="text-4xl font-semibold text-center mb-8">Random Phrase Generator</h1>
 

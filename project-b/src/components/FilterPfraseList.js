@@ -49,16 +49,15 @@ const FilteredPhraseList = ({ phrases, author }) => {
                   <input
                     type="text"
                     value={editText}
+                    placeholder="Введите текст"
                     onChange={(e) => setEditText(e.target.value)}
-                    style={{ color: "black" }}
-                    className="border px-2 py-1 mr-2" 
+                    className="border border-gray-300 p-2 rounded text-black bg-white"
                   />
                   <input
                     type="text"
                     value={editAuthor}
                     onChange={(e) => setEditAuthor(e.target.value)}
-                    style={{ color: "black" }}
-                    className="border px-2 py-1 mr-2" 
+                    className="border border-gray-300 p-2 rounded text-black bg-white"
                   />
                   <button onClick={handleSave} className="text-green-600 mr-2">Сохранить</button>
                   <button onClick={() => setEditingIndex(null)} className="text-red-600">Отмена</button>
