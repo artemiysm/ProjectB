@@ -35,3 +35,11 @@ export const addRandomPhrase = (text, author) => {
   phrases.push({ text, author });
   localStorage.setItem(PHRASES_KEY, JSON.stringify(phrases));
 };
+// Редактировать фразу
+export const editPhrase = (index, newText, newAuthor) => {
+  const phrases = JSON.parse(localStorage.getItem("phrases")) || [];
+  if (phrases[index]) {
+    phrases[index] = { text: newText, author: newAuthor };
+    localStorage.setItem("phrases", JSON.stringify(phrases));
+  }
+};
