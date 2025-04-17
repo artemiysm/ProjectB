@@ -19,7 +19,7 @@ const FavoritePhrase = () => {
       setFavoritePhrase(storedFavorite);
     }
 
-    // Получаем случайную фразу с помощью нашей утилитки
+    // Получаем случайную фразу с помощью нашей проги
     const phrase = getRandomPhrase();
     // Устанавливаем эту фразу в состояние
     setRandomPhrase(phrase);

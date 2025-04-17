@@ -10,7 +10,7 @@ export const FavoritesProvider = ({ children }) => {
   // Создаём состояние для массива избранных фраз
   const [favoritePhrases, setFavoritePhrases] = useState([]);
 
-  // При первом монтировании компонента загружаем избранные фразы из localStorage
+  // При первом состояние компонента загружаем избранные фразы из localStorage
   useEffect(() => {
     // Получаем строку из localStorage, парсим её в массив (или пустой массив, если данных нет)
     const storedFavorites = JSON.parse(localStorage.getItem("favoritePhrases")) || [];
@@ -24,7 +24,7 @@ export const FavoritesProvider = ({ children }) => {
     localStorage.setItem("favoritePhrases", JSON.stringify(favoritePhrases));
   }, [favoritePhrases]);
 
-  // Возвращаем контекст-провайдер, который оборачивает дочерние компоненты
+  // Возвращаем контекст, который оборачивает дочерние компоненты
   // и передаёт в них текущее состояние и функцию для его изменения
   return (
     <FavoritesContext.Provider value={{ favoritePhrases, setFavoritePhrases }}>
