@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";
+// Импорт утилит для работы с localStorage
 import {
   initializeLocalStorage,
   getRandomPhrase,
@@ -7,22 +8,23 @@ import {
   editPhrase,
 } from "./components/localStorageUtils";
 
-
+// Начальное состояние для фильтрации фраз
 const initialFilterState = {
-  allPhrases: [],
-  filteredPhrases: [],
-  author: "Все",
+  allPhrases: [],          // Все доступные фразы
+  filteredPhrases: [],     // Отфильтрованные фразы
+  author: "Все",           // Выбранный автор для фильтра
 };
 
+// Редуктор для управления фильтрацией
 const reducer = (state, action) => {
   switch (action.type) {
-    case "SET_PHRASES":
+    case "SET_PHRASES": // Установка всех фраз
       return {
         ...state,
         allPhrases: action.payload,
         filteredPhrases: action.payload,
       };
-    case "FILTER_BY_AUTHOR":
+    case "FILTER_BY_AUTHOR": // Фильтрация по автору
       return {
         ...state,
         author: action.payload,
@@ -41,47 +43,62 @@ const reducer = (state, action) => {
 };
 
 const App = () => {
+  // Состояние для текущей случайной фразы
   const [randomPhrase, setRandomPhrase] = useState({ text: "", author: "" });
+
+  // Состояния для формы добавления новой фразы
   const [newPhrase, setNewPhrase] = useState("");
   const [newAuthor, setNewAuthor] = useState("");
+
+  // Состояния для избранных фраз
   const [favoritePhrases, setFavoritePhrases] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
-  const [editedPhrase, setEditedPhrase] = useState("");
-  const [editedAuthor, setEditedAuthor] = useState("");
+
+  // Состояния для редактирования
+  const [editIndex, setEditIndex] = useState(null);           // Индекс редактируемой фразы
+  const [editedPhrase, setEditedPhrase] = useState("");       // Текст редактируемой фразы
+  const [editedAuthor, setEditedAuthor] = useState("");       // Автор редактируемой фразы
+
+  // Используем useReducer для фильтрации фраз
   const [state, dispatch] = useReducer(reducer, initialFilterState);
 
+  // Ссылка на кнопку генерации фразы (для фокуса при загрузке)
   const generateBtnRef = useRef(null);
 
+  // useEffect для инициализации данных при первом рендере
   useEffect(() => {
-    initializeLocalStorage();
+    initializeLocalStorage(); // Инициализация localStorage, если данных нет
     const storedFavorites = JSON.parse(localStorage.getItem("favoritePhrases")) || [];
-    setFavoritePhrases(storedFavorites);
-    const random = getRandomPhrase();
+    setFavoritePhrases(storedFavorites); // Загрузка избранного
+    const random = getRandomPhrase(); // Получаем случайную фразу
     setRandomPhrase(random);
-    const phrases = getAllPhrases();
-    dispatch({ type: "SET_PHRASES", payload: phrases });
+    const phrases = getAllPhrases(); // Загружаем все фразы
+    dispatch({ type: "SET_PHRASES", payload: phrases }); // Устанавливаем их в состояние
   }, []);
 
+  // useEffect для обновления localStorage при изменении избранного
   useEffect(() => {
     localStorage.setItem("favoritePhrases", JSON.stringify(favoritePhrases));
   }, [favoritePhrases]);
 
+  // Фокус на кнопку генерации при первом рендере
   useEffect(() => {
     if (generateBtnRef.current) {
       generateBtnRef.current.focus();
     }
   }, []);
 
+  // Добавление новой фразы
   const handleAddPhrase = () => {
     if (newPhrase.trim() !== "" && newAuthor.trim() !== "") {
-      addRandomPhrase(newPhrase, newAuthor);
-      setRandomPhrase(getRandomPhrase());
-      setNewPhrase("");
+      addRandomPhrase(newPhrase, newAuthor);               // Сохраняем в localStorage
+      setRandomPhrase(getRandomPhrase());                  // Показываем новую случайную
+      setNewPhrase("");                                    // Очищаем поля формы
       setNewAuthor("");
-      dispatch({ type: "SET_PHRASES", payload: getAllPhrases() });
+      dispatch({ type: "SET_PHRASES", payload: getAllPhrases() }); // Обновляем список
     }
   };
 
+  // Добавление текущей фразы в избранное
   const handleSetFavorite = () => {
     const isDuplicate = favoritePhrases.some(
       (p) => p.text === randomPhrase.text && p.author === randomPhrase.author
@@ -91,32 +108,39 @@ const App = () => {
     }
   };
 
+  // Генерация новой случайной фразы
   const handleGenerateNew = () => {
     setRandomPhrase(getRandomPhrase());
   };
 
+  // Начать редактирование фразы
   const handleEdit = (index, phrase) => {
     setEditIndex(index);
     setEditedPhrase(phrase.text);
     setEditedAuthor(phrase.author);
   };
 
+  // Сохранение отредактированной фразы
   const handleSaveEdit = () => {
     if (editedPhrase.trim() && editedAuthor.trim()) {
-      editPhrase(editIndex, editedPhrase, editedAuthor);
-      setEditIndex(null);
+      editPhrase(editIndex, editedPhrase, editedAuthor); // Сохраняем изменения
+      setEditIndex(null);                                // Сбрасываем режим редактирования
       setEditedPhrase("");
       setEditedAuthor("");
-      dispatch({ type: "SET_PHRASES", payload: getAllPhrases() });
+      dispatch({ type: "SET_PHRASES", payload: getAllPhrases() }); // Обновляем список
     }
   };
 
+  // Список авторов для фильтрации (уникальные + "Все")
   const authors = ["Все", ...new Set(state.allPhrases.map((p) => p.author).filter(Boolean))];
 
   return (
+    // Главный контейнер приложения
     <div className="min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600 text-black font-sans">
       <div className="container mx-auto px-6 py-12">
-        <h1 className="text-4xl font-semibold text-center mb-8">Random Phrase Generator</h1>
+
+        {/* Заголовок */}
+        <h1 className="text-4xl font-semibold text-center text-white mb-8">Генератор случайных цитат</h1>
 
         {/* Случайная фраза */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
@@ -144,7 +168,7 @@ const App = () => {
           </div>
         </div>
 
-        {/* Добавление фразы */}
+        {/* Форма добавления новой фразы */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Добавить свою фразу:</h2>
           <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-4 sm:space-y-0">
@@ -171,7 +195,7 @@ const App = () => {
           </div>
         </div>
 
-        {/* Фильтрация  по автору*/}
+        {/* Фильтрация по автору */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Фильтрация по автору:</h2>
           <select
@@ -188,8 +212,8 @@ const App = () => {
             ))}
           </select>
         </div>
-        
-        {/* Список отфильтрованных фраз с редактированием */}
+
+        {/* Список фраз с возможностью редактирования */}
         {state.filteredPhrases.length > 0 ? (
           <ul className="space-y-4">
             {state.filteredPhrases.map((phrase, index) => {
@@ -205,13 +229,13 @@ const App = () => {
                         type="text"
                         value={editedPhrase}
                         onChange={(e) => setEditedPhrase(e.target.value)}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black bg-white"
                       />
                       <input
                         type="text"
                         value={editedAuthor}
                         onChange={(e) => setEditedAuthor(e.target.value)}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black bg-white"
                       />
                       <button
                         onClick={handleSaveEdit}
@@ -240,9 +264,8 @@ const App = () => {
         ) : (
           <p>Нет фраз для выбранного автора.</p>
         )}
-        
 
-        {/* Избранное */}
+        {/* Секция избранных фраз */}
         {favoritePhrases.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-8">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Избранные фразы:</h2>
